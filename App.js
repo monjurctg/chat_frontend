@@ -1,15 +1,18 @@
-import { View, Text } from "react-native";
+import React from 'react';
+// import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { AuthProvider } from './context/AuthContext';
+import AppNavigator from './navigation/AppNavigator';
 
-export default function App() {
+const App = () => {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Universal React with Expo</Text>
-    </View>
+    <AuthProvider>
+      <NavigationContainer>
+        {/* <StatusBar style="auto" /> */}
+        <AppNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
-}
+};
+
+export default App;
