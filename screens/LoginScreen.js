@@ -6,13 +6,14 @@ import AuthContext from '../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
     const { loginUser } = useContext(AuthContext);
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
   const handleLogin = async () => {
+    console.log(phone,password)
     try {
-      const response = await login(email, password);
+      const response = await login(phone, password);
       if (response.token) {
         loginUser(response)
         navigation.navigate('Home');
@@ -28,9 +29,9 @@ const LoginScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.header}>Login</Text>
       <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
+        value={phone}
+        onChangeText={setPhone}
+        placeholder="Phone"
         style={styles.input}
       />
       <TextInput

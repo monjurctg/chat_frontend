@@ -2,9 +2,9 @@ import axiosInstance from "./axiosInstance";
 
 
 // Login
-export const login = async (email, password) => {
+export const login = async (phone, password) => {
   try {
-    const response = await axiosInstance.post('/api/auth/login', { email, password });
+    const response = await axiosInstance.post('/api/auth/login', { phone, password });
     return response.data; // Expect { token, user }
   } catch (error) {
     console.error(`Login error: ${error.response?.status} - ${error.response?.data?.message}`);
@@ -13,9 +13,9 @@ export const login = async (email, password) => {
 };
 
 // Register
-export const register = async (name, email, password) => {
+export const register = async (name, email,phone, password) => {
   try {
-    const response = await axiosInstance.post('/api/auth/register', { name, email, password });
+    const response = await axiosInstance.post('/api/auth/register', { name, email,phone, password });
     return response.data; // Expect { token, user }
   } catch (error) {
     console.log(error)
@@ -47,6 +47,17 @@ export const getChats = async () => {
     throw error;
   }
 };
+export const getSuggestUser = async () => {
+  try {
+    const response = await axiosInstance.get('/api/user/suggest_user');
+   console.log({response})
+    return response.data; // Expect the chats list
+  } catch (error) {
+   
+    console.error(`get Suggestuser error: ${error.response?.status} - ${error.response?.data?.message}`);
+    throw error;
+  }
+};
 
 
 
@@ -62,3 +73,41 @@ export const handleUpdateFace = async (userId, faceDescriptor) => {
     console.error('Error updating face:', error);
   }
 };
+
+
+
+
+
+// Send Friend Request
+export const sendFriendRequest = async (senderId, receiverId) => {
+  try {
+    const response = await axiosInstance.post('/api/user/sendRequest', {receiverId });
+    return response.data; // Expect a success message or the updated friendship data
+  } catch (error) {
+    console.error(`sendFriendRequest error: ${error.response?.status} - ${error.response?.data?.message}`);
+    throw error; // Re-throwing the error so it can be caught by the calling function
+  }
+};
+
+// Cancel Friend Request
+export const cancelFriendRequest = async (senderId, receiverId) => {
+  try {
+    const response = await axiosInstance.post('/api/user/removeFriend', {  receiverId });
+    return response.data; // Expect a success message or the updated friendship data
+  } catch (error) {
+    console.error(`cancelFriendRequest error: ${error.response?.status} - ${error.response?.data?.message}`);
+    throw error; // Re-throwing the error so it can be caught by the calling function
+  }
+};
+
+// Accept Friend Request
+export const acceptFriendRequest = async (senderId, receiverId) => {
+  try {
+    const response = await axiosInstance.post('/api/user/respondRequest', {  receiverId });
+    return response.data; // Expect a success message or the updated friendship data
+  } catch (error) {
+    console.error(`acceptFriendRequest error: ${error.response?.status} - ${error.response?.data?.message}`);
+    throw error; // Re-throwing the error so it can be caught by the calling function
+  }
+};
+

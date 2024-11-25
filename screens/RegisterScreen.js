@@ -5,15 +5,16 @@ import { register } from '../services/api';
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
+  const[phone,setPhone]=useState('')
 
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
   const handleRegister = async () => {
-    console.log("jpress")
+   
     try {
-      const response = await register(name,email, password);
-      console.log(response)
+      const response = await register(name,email,phone, password);
+     
       if (response.user) {
         // Save the token to persist authentication
         navigation.navigate('Login');
@@ -32,6 +33,12 @@ const RegisterScreen = ({ navigation }) => {
         value={name}
         onChangeText={setName}
         placeholder="Name"
+        style={styles.input}
+      />
+       <TextInput
+        value={phone}
+        onChangeText={setPhone}
+        placeholder="Phone"
         style={styles.input}
       />
       <TextInput
