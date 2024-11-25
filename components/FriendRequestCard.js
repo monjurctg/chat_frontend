@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 import axiosInstance from '../services/axiosInstance';
+import AuthContext from '../context/AuthContext';
 
-const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcceptRequest }) => {
+const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptRequest }) => {
   const [friendshipStatus, setFriendshipStatus] = useState(null);
+  const {user}=useContext(AuthContext)
   const [isSender, setIsSender] = useState(false); // Track if current user is the sender
 
   useEffect(() => {
@@ -15,15 +17,17 @@ const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcc
           params: { receiverId: item.id },
         });
 
-        setFriendshipStatus(response.data.status); // 'pending', 'accepted', 'declined', or 'none'
-        setIsSender(response.data.senderId === userId); // Check if current user is the sender
+        setFriendshipStatus(response.data.status);
+        console.log(response.data.senderId)
+        // 'pending', 'accepted', 'declined', or 'none'
+        setIsSender(response.data.senderId === user?.id); // Check if current user is the sender
       } catch (error) {
         console.error('Error fetching friendship status:', error);
       }
     };
 
     fetchFriendshipStatus();
-  }, [item, userId]);
+  }, [item]);
 
   const handleSendRequest = () => {
     onSendRequest(item.id); // Trigger send request callback
