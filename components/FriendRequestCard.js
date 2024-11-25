@@ -1,38 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+
 import axiosInstance from '../services/axiosInstance';
 
-const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptRequest }) => {
+const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcceptRequest }) => {
   const [friendshipStatus, setFriendshipStatus] = useState(null);
+  const [isSender, setIsSender] = useState(false); // Track if current user is the sender
 
   useEffect(() => {
     // Fetch friendship status when the component mounts or item changes
     const fetchFriendshipStatus = async () => {
       try {
         const response = await axiosInstance.get('/api/user/friend_status', {
-          params: { receiverId: item.id },  // Send only receiverId
+          params: { receiverId: item.id },
         });
-        console.log({response})
+
         setFriendshipStatus(response.data.status); // 'pending', 'accepted', 'declined', or 'none'
+        setIsSender(response.data.senderId === userId); // Check if current user is the sender
       } catch (error) {
         console.error('Error fetching friendship status:', error);
       }
     };
 
     fetchFriendshipStatus();
-  }, [item]);
+  }, [item, userId]);
 
   const handleSendRequest = () => {
-    onSendRequest(item.id); // Send request to HomeScreen for handling
+    onSendRequest(item.id); // Trigger send request callback
+    setFriendshipStatus('pending');
+    setIsSender(true); // Mark current user as sender
   };
 
   const handleCancelRequest = () => {
-    onCancelRequest(item.id); // Send cancel request to HomeScreen for handling
+    onCancelRequest(item.id); // Trigger cancel request callback
+    setFriendshipStatus('none');
   };
 
   const handleAcceptRequest = () => {
-    onAcceptRequest(item.id); // Accept request via HomeScreen
+    onAcceptRequest(item.id); // Trigger accept request callback
+    setFriendshipStatus('accepted');
+  };
+
+  const handleDeclineRequest = () => {
+    onCancelRequest(item.id); // Use the same cancel request function
+    setFriendshipStatus('none');
   };
 
   return (
@@ -43,23 +54,29 @@ const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptReque
       />
       <Text style={styles.userName}>{item.name}</Text>
 
-      {/* Handle different states of friendship status */}
+      {/* Conditional UI based on friendship status */}
       {friendshipStatus === 'pending' ? (
-        <>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={handleCancelRequest}
-          >
-            <Text style={styles.buttonText}>Cancel Request</Text>
-          </TouchableOpacity>
-        </>
+        isSender ? (
+          <>
+            <Text style={styles.statusText}>Friend Request Sent</Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancelRequest}>
+              <Text style={styles.buttonText}>Cancel Request</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptRequest}>
+              <Text style={styles.buttonText}>Accept</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.declineButton} onPress={handleDeclineRequest}>
+              <Text style={styles.buttonText}>Decline</Text>
+            </TouchableOpacity>
+          </>
+        )
       ) : friendshipStatus === 'accepted' ? (
         <Text style={styles.statusText}>You are friends</Text>
       ) : (
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={handleSendRequest}
-        >
+        <TouchableOpacity style={styles.sendButton} onPress={handleSendRequest}>
           <Text style={styles.buttonText}>Send Request</Text>
         </TouchableOpacity>
       )}
@@ -100,6 +117,20 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cancelButton: {
+    backgroundColor: '#FF6347',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    width: '100%',
+  },
+  acceptButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    width: '100%',
+  },
+  declineButton: {
     backgroundColor: '#FF6347',
     paddingVertical: 10,
     borderRadius: 8,

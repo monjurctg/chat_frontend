@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Alert, StyleSheet } from 'react-native';
-// Assuming this is the path to your FriendRequestCard component
-import { sendFriendRequest, cancelFriendRequest, acceptFriendRequest ,getSuggestUser} from '../services/api'; // Importing the refactored functions
+import {
+  View,
+  Text,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
+import { sendFriendRequest, cancelFriendRequest, acceptFriendRequest, getSuggestUser } from '../services/api'; // Importing the refactored functions
 import FriendRequestCard from '../components/FriendRequestCard';
-
 
 const HomeScreen = ({ navigation }) => {
   const [suggestUsers, setSuggestUsers] = useState([]);
   const [userId, setUserId] = useState(1); // Replace with actual user's ID from auth context or state
+  const [activeTab, setActiveTab] = useState('findFriends'); // Tabs: 'findFriends' or 'friendList'
 
   // Fetch suggested users from the API
   const fetchSuggestUsers = async () => {
     try {
-      const users = await getSuggestUser(); // Assume getSuggestUser is still here
-      setSuggestUsers(users);  // Update state with fetched users
+      const users = await getSuggestUser();
+      setSuggestUsers(users);
     } catch (error) {
       console.error('Error fetching suggested users:', error);
       Alert.alert('Error', 'Failed to fetch suggested users. Please try again later.');
@@ -23,9 +29,9 @@ const HomeScreen = ({ navigation }) => {
   // Handle sending friend request
   const handleSendFriendRequest = async (receiverId) => {
     try {
-      const data = await sendFriendRequest(userId, receiverId); // Call the sendFriendRequest function
+      const data = await sendFriendRequest(userId, receiverId);
       Alert.alert('Success', 'Friend Request Sent');
-      console.log(data); // Optional: log the response from the backend
+      console.log(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to send friend request');
     }
@@ -34,9 +40,9 @@ const HomeScreen = ({ navigation }) => {
   // Handle canceling friend request
   const handleCancelFriendRequest = async (receiverId) => {
     try {
-      const data = await cancelFriendRequest(userId, receiverId); // Call the cancelFriendRequest function
+      const data = await cancelFriendRequest(userId, receiverId);
       Alert.alert('Success', 'Friend Request Canceled');
-      console.log(data); // Optional: log the response from the backend
+      console.log(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to cancel friend request');
     }
@@ -45,16 +51,16 @@ const HomeScreen = ({ navigation }) => {
   // Handle accepting friend request
   const handleAcceptFriendRequest = async (senderId) => {
     try {
-      const data = await acceptFriendRequest(senderId, userId); // Call the acceptFriendRequest function
+      const data = await acceptFriendRequest(senderId, userId);
       Alert.alert('Success', 'Friend Request Accepted');
-      console.log(data); // Optional: log the response from the backend
+      console.log(data);
     } catch (error) {
       Alert.alert('Error', 'Failed to accept friend request');
     }
   };
 
   useEffect(() => {
-    fetchSuggestUsers(); // Fetch suggested users on mount
+    fetchSuggestUsers();
   }, []);
 
   const renderItem = ({ item }) => (
@@ -67,14 +73,64 @@ const HomeScreen = ({ navigation }) => {
     />
   );
 
+  const renderContent = () => {
+    if (activeTab === 'findFriends') {
+      return (
+        <FlatList
+          data={suggestUsers}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No suggested friends found.</Text>
+          }
+        />
+      );
+    } else {
+      // Navigate to Friend List
+      navigation.navigate('FriendList'); // Ensure FriendList screen is defined in your navigation stack
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Suggested Friends</Text>
-      <FlatList
-        data={suggestUsers}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === 'findFriends' && styles.activeTabButton,
+          ]}
+          onPress={() => setActiveTab('findFriends')}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === 'findFriends' && styles.activeTabText,
+            ]}
+          >
+            Find Friends
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeTab === 'friendList' && styles.activeTabButton,
+          ]}
+          onPress={() => setActiveTab('friendList')}
+        >
+          <Text
+            style={[
+              styles.tabButtonText,
+              activeTab === 'friendList' && styles.activeTabText,
+            ]}
+          >
+            Friend List
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.header}>
+        {activeTab === 'findFriends' ? 'Suggested Friends' : 'Your Friends'}
+      </Text>
+      {renderContent()}
     </View>
   );
 };
@@ -85,11 +141,41 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#f9f9f9',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    marginHorizontal: 5,
+    borderRadius: 25,
+    backgroundColor: '#e0e0e0',
+    alignItems: 'center',
+  },
+  activeTabButton: {
+    backgroundColor: '#007bff',
+  },
+  tabButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  activeTabText: {
+    color: '#fff',
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#888',
+    marginTop: 20,
   },
 });
 
