@@ -102,7 +102,7 @@ export const cancelFriendRequest = async (receiverId) => {
 };
 
 // Accept Friend Request
-export const acceptFriendRequest = async (senderId, receiverId) => {
+export const acceptFriendRequest = async (receiverId) => {
   try {
     const response = await axiosInstance.post('/api/user/respondRequest', {  receiverId });
     return response.data; // Expect a success message or the updated friendship data

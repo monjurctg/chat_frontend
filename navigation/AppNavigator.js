@@ -8,13 +8,15 @@ import AuthContext from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import { Text } from 'react-native';
+import FriendList from '../screens/FriendList';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     const { isAuthenticated,user } = useContext(AuthContext);
+    console.log(user,isAuthenticated)
 
-if(!user){
+if(!user && isAuthenticated) {
   return <Text>Loading...</Text>
 }
 
@@ -27,6 +29,9 @@ if(!user){
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
         <Stack.Screen name="GroupChat" component={GroupChatScreen} />
+        <Stack.Screen name="FriendList" component={FriendList} />
+
+
         </>
       ) : (
         <>

@@ -13,7 +13,7 @@ import AuthContext from '../context/AuthContext';
 
 const HomeScreen = ({ navigation }) => {
   const [suggestUsers, setSuggestUsers] = useState([]);
-  const [activeTab, setActiveTab] = useState('findFriends'); // Tabs: 'findFriends' or 'friendList'
+  const [activeTab, setActiveTab] = useState('findFriends');
   const { user } = useContext(AuthContext)
   let userId = user?.id
 
@@ -33,7 +33,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const data = await sendFriendRequest(userId, receiverId);
       Alert.alert('Success', 'Friend Request Sent');
- 
+
     } catch (error) {
       Alert.alert('Error', 'Failed to send friend request');
     }
@@ -44,7 +44,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const data = await cancelFriendRequest(receiverId);
       Alert.alert('Success', 'Friend Request Canceled');
-     
+
     } catch (error) {
       Alert.alert('Error', 'Failed to cancel friend request');
     }
@@ -52,8 +52,9 @@ const HomeScreen = ({ navigation }) => {
 
   // Handle accepting friend request
   const handleAcceptFriendRequest = async (senderId) => {
+
     try {
-      const data = await acceptFriendRequest(senderId, userId);
+      const data = await acceptFriendRequest(senderId);
       Alert.alert('Success', 'Friend Request Accepted');
       console.log(data);
     } catch (error) {
@@ -88,8 +89,8 @@ const HomeScreen = ({ navigation }) => {
         />
       );
     } else {
-      // Navigate to Friend List
-      navigation.navigate('FriendList'); // Ensure FriendList screen is defined in your navigation stack
+
+      navigation.navigate('FriendList');
     }
   };
 
@@ -138,7 +139,7 @@ const HomeScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+   container: {
     flex: 1,
     padding: 15,
     backgroundColor: '#f9f9f9',

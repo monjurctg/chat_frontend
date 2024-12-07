@@ -18,8 +18,7 @@ const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcc
         });
 
         setFriendshipStatus(response.data.status);
-        console.log(response.data.senderId, userId)
-        // console.log(response.data.senderId, user?.id)
+
         setIsSender(response.data.senderId == userId);
       } catch (error) {
         console.error('Error fetching friendship status:', error);
@@ -31,9 +30,9 @@ const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcc
 
   const handleSendRequest = async () => {
     try {
-      await onSendRequest(item.id); // Call send request API
+      await onSendRequest(item.id);
       setFriendshipStatus('pending');
-      setIsSender(true); // Mark current user as the sender
+      setIsSender(true);
     } catch (error) {
       console.error('Error sending friend request:', error);
     }
@@ -41,7 +40,7 @@ const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcc
 
   const handleCancelRequest = async () => {
     try {
-      await onCancelRequest(item.id); // Call cancel request API
+      await onCancelRequest(item.id);
       setFriendshipStatus('none');
     } catch (error) {
       console.error('Error canceling friend request:', error);
@@ -49,6 +48,7 @@ const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcc
   };
 
   const handleAcceptRequest = async () => {
+
     try {
       await onAcceptRequest(item.id); // Call accept request API
       setFriendshipStatus('accepted');
