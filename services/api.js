@@ -61,6 +61,18 @@ export const getSuggestUser = async () => {
 };
 
 
+export const getFriendList = async () => {
+  try {
+    const response = await axiosInstance.get('/api/user/friend-list');
+   console.log({response})
+    return response.data; // Expect the chats list
+  } catch (error) {
+
+    console.error(`get Suggestuser error: ${error.response?.status} - ${error.response?.data?.message}`);
+    throw error;
+  }
+};
+
 
 export const handleUpdateFace = async (userId, faceDescriptor) => {
   try {

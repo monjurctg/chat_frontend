@@ -1,12 +1,29 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import AuthContext from '../context/AuthContext';
 import { TouchableOpacity } from 'react-native';
+import { getFriendList } from '../services/api';
 
 const FriendList = ({navigation}) => {
     const [activeTab, setActiveTab] = useState('friendList');
     const { user } = useContext(AuthContext)
     let userId = user?.id
+
+    const fetchFriendList = async () => {
+        try {
+          const users = await getFriendList();
+        //   setSuggestUsers(users);
+        console.log(users)
+        } catch (error) {
+          console.error('Error fetching suggested users:', error);
+          Alert.alert('Error', 'Failed to fetch suggested users. Please try again later.');
+        }
+      };
+
+      useEffect(()=>{
+        fetchFriendList()
+
+      },[])
   return (
     <View>
        <View style={styles.buttonContainer}>
