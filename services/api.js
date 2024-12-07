@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axiosInstance from "./axiosInstance";
 
 
@@ -64,7 +65,7 @@ export const getSuggestUser = async () => {
 export const getFriendList = async () => {
   try {
     const response = await axiosInstance.get('/api/user/friend-list');
-   console.log({response})
+
     return response.data; // Expect the chats list
   } catch (error) {
 
@@ -86,7 +87,6 @@ export const handleUpdateFace = async (userId, faceDescriptor) => {
     console.error('Error updating face:', error);
   }
 };
-
 
 
 
@@ -116,9 +116,10 @@ export const cancelFriendRequest = async (receiverId) => {
 // Accept Friend Request
 export const acceptFriendRequest = async (receiverId) => {
   try {
-    const response = await axiosInstance.post('/api/user/respondRequest', {  receiverId });
+    const response = await axiosInstance.post('/api/user/respondRequest', {receiverId });
     return response.data; // Expect a success message or the updated friendship data
   } catch (error) {
+    console.log(error)
     console.error(`acceptFriendRequest error: ${error.response?.status} - ${error.response?.data?.message}`);
     throw error; // Re-throwing the error so it can be caught by the calling function
   }

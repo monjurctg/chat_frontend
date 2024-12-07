@@ -51,10 +51,10 @@ const HomeScreen = ({ navigation }) => {
   };
 
   // Handle accepting friend request
-  const handleAcceptFriendRequest = async (senderId) => {
+  const handleAcceptFriendRequest = async (receiverId) => {
 
     try {
-      const data = await acceptFriendRequest(senderId);
+      const data = await acceptFriendRequest(receiverId);
       Alert.alert('Success', 'Friend Request Accepted');
       console.log(data);
     } catch (error) {
