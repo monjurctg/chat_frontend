@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useState, useEffect } from 'react';
+import axiosInstance from '../services/axiosInstance';
 
 const AuthContext = createContext();
 
@@ -18,7 +19,25 @@ export const AuthProvider = ({ children }) => {
       }
     };
     checkAuthStatus();
+    getLoginUser()
   }, []);
+
+  const getLoginUser = async () => {
+    try {
+      const response = await axiosInstance.get('/api/auth/getLoginUser');
+      setUser(response.data?.user); // Set user state directly
+      console.log(response.data?.user); // Log the user's ID
+    } catch (error) {
+      if (error.response) {
+        // Handle API response errors
+        console.error(`Login error: ${error.response.status} - ${error.response.data?.message}`);
+      } else {
+        // Handle network or unexpected errors
+        console.error(`Login error: ${error.message}`);
+      }
+    }
+  };
+
 
   const loginUser = async (userData) => {
     setIsAuthenticated(true);

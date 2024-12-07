@@ -12,6 +12,7 @@ export const login = async (phone, password) => {
   }
 };
 
+
 // Register
 export const register = async (name, email,phone, password) => {
   try {
@@ -53,7 +54,7 @@ export const getSuggestUser = async () => {
    console.log({response})
     return response.data; // Expect the chats list
   } catch (error) {
-   
+
     console.error(`get Suggestuser error: ${error.response?.status} - ${error.response?.data?.message}`);
     throw error;
   }
@@ -90,9 +91,9 @@ export const sendFriendRequest = async (senderId, receiverId) => {
 };
 
 // Cancel Friend Request
-export const cancelFriendRequest = async (senderId, receiverId) => {
+export const cancelFriendRequest = async (receiverId) => {
   try {
-    const response = await axiosInstance.post('/api/user/removeFriend', {  receiverId });
+    const response = await axiosInstance.post('/api/user/removeFriend', { receiverId });
     return response.data; // Expect a success message or the updated friendship data
   } catch (error) {
     console.error(`cancelFriendRequest error: ${error.response?.status} - ${error.response?.data?.message}`);

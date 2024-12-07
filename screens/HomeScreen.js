@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
 } from 'react-native';
 import { sendFriendRequest, cancelFriendRequest, acceptFriendRequest, getSuggestUser } from '../services/api'; // Importing the refactored functions
 import FriendRequestCard from '../components/FriendRequestCard';
+import AuthContext from '../context/AuthContext';
 
 const HomeScreen = ({ navigation }) => {
   const [suggestUsers, setSuggestUsers] = useState([]);
-  const [userId, setUserId] = useState(1); // Replace with actual user's ID from auth context or state
   const [activeTab, setActiveTab] = useState('findFriends'); // Tabs: 'findFriends' or 'friendList'
+  const { user } = useContext(AuthContext)
+  let userId = user?.id
 
   // Fetch suggested users from the API
   const fetchSuggestUsers = async () => {
@@ -31,7 +33,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const data = await sendFriendRequest(userId, receiverId);
       Alert.alert('Success', 'Friend Request Sent');
-      console.log(data);
+ 
     } catch (error) {
       Alert.alert('Error', 'Failed to send friend request');
     }
@@ -40,9 +42,9 @@ const HomeScreen = ({ navigation }) => {
   // Handle canceling friend request
   const handleCancelFriendRequest = async (receiverId) => {
     try {
-      const data = await cancelFriendRequest(userId, receiverId);
+      const data = await cancelFriendRequest(receiverId);
       Alert.alert('Success', 'Friend Request Canceled');
-      console.log(data);
+     
     } catch (error) {
       Alert.alert('Error', 'Failed to cancel friend request');
     }

@@ -7,11 +7,17 @@ import GroupChatScreen from '../screens/GroupChatScreen';
 import AuthContext from '../context/AuthContext';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import { Text } from 'react-native';
 
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-    const { isAuthenticated } = useContext(AuthContext);
+    const { isAuthenticated,user } = useContext(AuthContext);
+
+if(!user){
+  return <Text>Loading...</Text>
+}
+
   return (
     <>
 

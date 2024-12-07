@@ -2,12 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 
 import axiosInstance from '../services/axiosInstance';
-import AuthContext from '../context/AuthContext';
 
-const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptRequest }) => {
+
+const FriendRequestCard = ({ item, userId, onSendRequest, onCancelRequest, onAcceptRequest }) => {
   const [friendshipStatus, setFriendshipStatus] = useState(null);
-  const {user}=useContext(AuthContext)
-  const [isSender, setIsSender] = useState(false); // Track if current user is the sender
+
+  const [isSender, setIsSender] = useState(false);
 
   useEffect(() => {
     // Fetch friendship status when the component mounts or item changes
@@ -18,37 +18,54 @@ const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptReque
         });
 
         setFriendshipStatus(response.data.status);
-        console.log(response.data.senderId)
-        // 'pending', 'accepted', 'declined', or 'none'
-        setIsSender(response.data.senderId === user?.id); // Check if current user is the sender
+        console.log(response.data.senderId, userId)
+        // console.log(response.data.senderId, user?.id)
+        setIsSender(response.data.senderId == userId);
       } catch (error) {
         console.error('Error fetching friendship status:', error);
       }
     };
 
     fetchFriendshipStatus();
-  }, [item]);
+  }, [item, isSender,userId]);
 
-  const handleSendRequest = () => {
-    onSendRequest(item.id); // Trigger send request callback
-    setFriendshipStatus('pending');
-    setIsSender(true); // Mark current user as sender
+  const handleSendRequest = async () => {
+    try {
+      await onSendRequest(item.id); // Call send request API
+      setFriendshipStatus('pending');
+      setIsSender(true); // Mark current user as the sender
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+    }
   };
 
-  const handleCancelRequest = () => {
-    onCancelRequest(item.id); // Trigger cancel request callback
-    setFriendshipStatus('none');
+  const handleCancelRequest = async () => {
+    try {
+      await onCancelRequest(item.id); // Call cancel request API
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error canceling friend request:', error);
+    }
   };
 
-  const handleAcceptRequest = () => {
-    onAcceptRequest(item.id); // Trigger accept request callback
-    setFriendshipStatus('accepted');
+  const handleAcceptRequest = async () => {
+    try {
+      await onAcceptRequest(item.id); // Call accept request API
+      setFriendshipStatus('accepted');
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+    }
   };
 
-  const handleDeclineRequest = () => {
-    onCancelRequest(item.id); // Use the same cancel request function
-    setFriendshipStatus('none');
+  const handleDeclineRequest = async () => {
+    try {
+      await onCancelRequest(item.id); // Use cancel request API for decline
+      setFriendshipStatus('none');
+    } catch (error) {
+      console.error('Error declining friend request:', error);
+    }
   };
+
 
   return (
     <View style={styles.card}>
@@ -59,7 +76,7 @@ const FriendRequestCard = ({ item, onSendRequest, onCancelRequest, onAcceptReque
       <Text style={styles.userName}>{item.name}</Text>
 
       {/* Conditional UI based on friendship status */}
-      {friendshipStatus === 'pending' ? (
+      {friendshipStatus == 'pending' ? (
         isSender ? (
           <>
             <Text style={styles.statusText}>Friend Request Sent</Text>
