@@ -9,31 +9,33 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
 
+  const checkAuthStatus = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+      // Optionally set user data if you want
+    }
+  };
+
+
   useEffect(() => {
-    // Check if user is already logged in (using AsyncStorage for persistence)
-    const checkAuthStatus = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        setIsAuthenticated(true);
-        // Optionally set user data if you want
-      }
-    };
-    checkAuthStatus();
     getLoginUser()
+  
+
   }, []);
 
   const getLoginUser = async () => {
     try {
       const response = await axiosInstance.get('/api/auth/getLoginUser');
-      setUser(response.data?.user); // Set user state directly
-      console.log(response.data?.user); // Log the user's ID
+
+      setUser(response.data?.user); // Set user state
+      checkAuthStatus();
     } catch (error) {
       if (error.response) {
-        // Handle API response errors
-        console.error(`Login error: ${error.response.status} - ${error.response.data?.message}`);
-      } else {
-        // Handle network or unexpected errors
-        console.error(`Login error: ${error.message}`);
+        if (error.response.status === 401) {
+          console.error("Unauthorized: Redirecting to login");
+          logoutUser()
+        }
       }
     }
   };

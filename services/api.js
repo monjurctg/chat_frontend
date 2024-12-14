@@ -41,7 +41,6 @@ export const getMessages = async (chatType, id) => {
 export const getChats = async () => {
   try {
     const response = await axiosInstance.get('/api/chat/list');
-    console.log(response)
     return response.data; // Expect the chats list
   } catch (error) {
     console.log(error)
@@ -52,7 +51,7 @@ export const getChats = async () => {
 export const getSuggestUser = async () => {
   try {
     const response = await axiosInstance.get('/api/user/suggest_user');
-   console.log({response})
+
     return response.data; // Expect the chats list
   } catch (error) {
 
@@ -82,7 +81,6 @@ export const handleUpdateFace = async (userId, faceDescriptor) => {
       faceDescriptor,
     });
 
-    console.log(response.data.message); // Success message
   } catch (error) {
     console.error('Error updating face:', error);
   }

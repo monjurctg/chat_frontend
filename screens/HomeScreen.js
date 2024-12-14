@@ -56,7 +56,7 @@ const HomeScreen = ({ navigation }) => {
     try {
       const data = await acceptFriendRequest(receiverId);
       Alert.alert('Success', 'Friend Request Accepted');
-      console.log(data);
+
     } catch (error) {
       Alert.alert('Error', 'Failed to accept friend request');
     }

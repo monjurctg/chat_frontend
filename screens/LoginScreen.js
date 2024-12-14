@@ -11,7 +11,7 @@ const LoginScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
 
   const handleLogin = async () => {
-    console.log(phone,password)
+
     try {
       const response = await login(phone, password);
       if (response.token) {

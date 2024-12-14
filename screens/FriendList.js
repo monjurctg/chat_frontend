@@ -5,6 +5,7 @@ import { TouchableOpacity } from 'react-native';
 import { getFriendList } from '../services/api';
 import { FlatList } from 'react-native';
 import { Image } from 'react-native';
+import { socket } from '../services/socket';
 
 const FriendList = ({navigation}) => {
     const [activeTab, setActiveTab] = useState('friendList');
@@ -16,7 +17,6 @@ const FriendList = ({navigation}) => {
     const fetchFriendList = async () => {
         try {
           const data = await getFriendList();
-        //   setSuggestUsers(users);
         setFriends(data?.friends)
         // console.log({users})
         } catch (error) {
@@ -24,6 +24,28 @@ const FriendList = ({navigation}) => {
           Alert.alert('Error', 'Failed to fetch suggested users. Please try again later.');
         }
       };
+
+
+
+
+      useEffect(() => {
+
+        socket.on('checkStatus', (data) => {
+          console.log(data)
+          setFriends((prevStatus) =>
+            prevStatus.map((friend) =>
+              friend.userId === data.userId
+                ? { ...friend, isOnline: data.isOnline }
+                : friend
+            )
+          );
+        });
+
+        return () => {
+          socket.disconnect();
+        };
+      }, []);
+
 
       useEffect(()=>{
         fetchFriendList()
@@ -40,8 +62,8 @@ const FriendList = ({navigation}) => {
         style={styles.logo}
       />
       <View style={styles.cardContent}>
-        <Text style={styles.name}>{item?.receiver?.name}</Text>
-        <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatId:item?.receiverId,userId:userId})}>
+        <Text style={styles.name}>{item?.name}</Text>
+        <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatId:item?.id,userId:userId})}>
           <Text style={styles.chatButtonText}>Chat</Text>
         </TouchableOpacity>
       </View>
