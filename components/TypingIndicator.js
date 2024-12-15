@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const TypingIndicator = ({ usersTyping }) => {
+const TypingIndicator = ({ usersTyping}) => {
 
   if (usersTyping.length === 0) return null;
 

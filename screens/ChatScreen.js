@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,18 @@ import {
 } from 'react-native';
 import { socket } from '../services/socket'; // Import socket instance
 import TypingIndicator from '../components/TypingIndicator';
+import AuthContext from '../context/AuthContext';
 
 const ChatScreen = ({ route }) => {
-  const { chatId, userId } = route.params;
+  const { chatUser } = route.params;
+
+  const { user } = useContext(AuthContext)
+  let userId = user?.id
+
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [usersTyping, setUsersTyping] = useState([]);
+  const chatId = chatUser?.id
 
   useEffect(() => {
     socket.emit('chatjoin', { chatId });
@@ -25,26 +31,27 @@ const ChatScreen = ({ route }) => {
     });
 
     // Handle typing events
-    socket.on('typing', ({ userId: typingUserId }) => {
+    socket.on('typing', ({ userId:typingUserId }) => {
       console.log(`Typing event received for user ${typingUserId}`);
+      const name = typingUserId==user?.id? user?.name:chatUser?.name
       setUsersTyping((prev) => {
-        if (!prev.includes(typingUserId)) {
-          return [...prev, typingUserId];
+        if (!prev.includes(name)) {
+          return [...prev, name];
         }
         return prev;
       });
     });
 
     // Handle stop typing events
-    socket.on(`stopTyping_${chatId}`, ({ userId:typingUserId }) => {
-      console.log(typingUserId)
-      setUsersTyping((prev) => prev.filter((id) => id !== typingUserId));
+    socket.on(`stopTyping`, ({ userId:typingUserId }) => {
+      const name = typingUserId==user?.id? user?.name:chatUser?.name
+      setUsersTyping((prev) => prev.filter((username) => username !== name));
     });
 
     return () => {
       socket.off('receiveMessage');
       socket.off('typing');
-      socket.off(`stopTyping_${chatId}`);
+      socket.off(`stopTyping`);
     };
   }, [chatId, usersTyping]);
 
@@ -96,7 +103,7 @@ const ChatScreen = ({ route }) => {
         keyExtractor={(item, index) => index.toString()}
         inverted // Display latest messages at the bottom
       />
-      <TypingIndicator usersTyping={usersTyping} />
+      <TypingIndicator  usersTyping={usersTyping} />
       <View style={styles.inputContainer}>
         <TextInput
           value={message}

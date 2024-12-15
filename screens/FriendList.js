@@ -92,7 +92,7 @@ const FriendList = ({navigation}) => {
       <View style={styles.cardContent}>
 
         <Text style={styles.name}>{item?.name}</Text>
-        <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatId:item?.id,userId:userId})}>
+        <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatUser:item})}>
           <Text style={styles.chatButtonText}>Chat</Text>
         </TouchableOpacity>
       </View>
