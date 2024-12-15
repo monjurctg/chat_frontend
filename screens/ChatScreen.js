@@ -7,9 +7,8 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
-import socket, { sendTyping, stopTyping } from '../services/socket';
+import { socket } from '../services/socket'; // Import socket instance
 import TypingIndicator from '../components/TypingIndicator';
-
 
 const ChatScreen = ({ route }) => {
   const { chatId, userId } = route.params;
@@ -18,68 +17,84 @@ const ChatScreen = ({ route }) => {
   const [usersTyping, setUsersTyping] = useState([]);
 
   useEffect(() => {
-    socket.emit('join', chatId); // Join the chat room
+    socket.emit('chatjoin', { chatId });
 
-    // Receive message from other users
+    // Receive new messages
     socket.on('receiveMessage', (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Handle typing event
-    socket.on(`typing_${chatId}`, ({ userId: typingUserId }) => {
-      if (!usersTyping.includes(typingUserId)) {
-        setUsersTyping((prev) => [...prev, typingUserId]);
-      }
+    // Handle typing events
+    socket.on('typing', ({ userId: typingUserId }) => {
+      console.log(`Typing event received for user ${typingUserId}`);
+      setUsersTyping((prev) => {
+        if (!prev.includes(typingUserId)) {
+          return [...prev, typingUserId];
+        }
+        return prev;
+      });
     });
 
-    // Handle stop typing event
-    socket.on(`stopTyping_${chatId}`, ({ userId: typingUserId }) => {
+    // Handle stop typing events
+    socket.on(`stopTyping_${chatId}`, ({ userId:typingUserId }) => {
+      console.log(typingUserId)
       setUsersTyping((prev) => prev.filter((id) => id !== typingUserId));
     });
 
     return () => {
       socket.off('receiveMessage');
-      socket.off(`typing_${chatId}`);
+      socket.off('typing');
       socket.off(`stopTyping_${chatId}`);
     };
   }, [chatId, usersTyping]);
 
   const sendMessage = () => {
     if (message.trim()) {
-      socket.emit('privateMessage', {
+      const newMessage =  {
         content: message,
         senderId: userId,
-        receiverId: chatId,
-      });
+        chatId,
+      }
+
       setMessage('');
-      stopTyping(chatId); // Stop typing event after sending a message
+      setMessages([...messages,newMessage])
+      socket.emit('privateMessage',newMessage);
+      socket.emit('stopTyping', { chatId, userId });
     }
   };
 
+
+
   const handleTyping = (text) => {
     setMessage(text);
-    if (text) sendTyping(chatId); // Send typing event
-    else stopTyping(chatId); // Stop typing event when the input is empty
+    if (text) {
+      socket.emit('typing', { chatId, userId });
+    } else {
+      socket.emit('stopTyping', { chatId, userId })
+    }
   };
+
+
 
   return (
     <View style={styles.container}>
       <FlatList
         data={messages}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.messageContainer,
-              item.senderId === userId
-                ? styles.sentMessage
-                : styles.receivedMessage,
-            ]}
-          >
-            <Text style={styles.messageText}>{item.content}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        inverted // Inverted to display the latest message at the bottom
+        renderItem={({ item }) => {
+
+          return  <View
+          style={[
+            styles.messageContainer,
+            item?.senderId == userId
+              ? styles.sentMessage
+              : styles.receivedMessage,
+          ]}
+        >
+          <Text style={styles.messageText}>{item.content}</Text>
+        </View>
+        }}
+        keyExtractor={(item, index) => index.toString()}
+        inverted // Display latest messages at the bottom
       />
       <TypingIndicator usersTyping={usersTyping} />
       <View style={styles.inputContainer}>
@@ -104,18 +119,19 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginVertical: 5,
+   margin:10,
     padding: 10,
     borderRadius: 10,
     maxWidth: '80%',
-    alignSelf: 'flex-start',
   },
   sentMessage: {
     backgroundColor: '#007BFF',
     alignSelf: 'flex-end',
   },
   receivedMessage: {
-    backgroundColor: '#e6e6e6',
+    backgroundColor: '#0005',
     alignSelf: 'flex-start',
+
   },
   messageText: {
     fontSize: 16,

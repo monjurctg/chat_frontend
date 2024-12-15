@@ -10,16 +10,20 @@ import { socket } from '../services/socket';
 const FriendList = ({navigation}) => {
     const [activeTab, setActiveTab] = useState('friendList');
     const [friends,setFriends]=useState([])
+    const[loading,setLoading] = useState(false)
 
     const { user } = useContext(AuthContext)
     let userId = user?.id
 
     const fetchFriendList = async () => {
+      setLoading(true)
         try {
           const data = await getFriendList();
         setFriends(data?.friends)
         // console.log({users})
+        setLoading(false)
         } catch (error) {
+          setLoading(false)
           console.error('Error fetching suggested users:', error);
           Alert.alert('Error', 'Failed to fetch suggested users. Please try again later.');
         }
@@ -27,24 +31,43 @@ const FriendList = ({navigation}) => {
 
 
 
-
       useEffect(() => {
 
-        socket.on('checkStatus', (data) => {
-          console.log(data)
-          setFriends((prevStatus) =>
-            prevStatus.map((friend) =>
-              friend.userId === data.userId
-                ? { ...friend, isOnline: data.isOnline }
-                : friend
+        const friendIds = friends.map((friend) => friend.id);
+        socket.emit('getFriendsStatus', friendIds);
+
+        // Receive initial friends' statuses from the server
+        const handleFriendsStatus = (statuses) => {
+
+          setFriends((prevFriends) =>
+            prevFriends.map((friend) => ({
+              ...friend,
+              status: statuses.find((s) => s.userId === friend.id)?.status || 'offline',
+            }))
+          );
+        };
+
+        const handleUserStatus = ({ userId, status }) => {
+          setFriends((prevFriends) =>
+            prevFriends.map((friend) =>
+              friend.id === userId ? { ...friend, status } : friend
             )
           );
-        });
+        };
+
+
+        socket.on('friendsStatus', handleFriendsStatus);
+        socket.on('userStatus', handleUserStatus);
+
 
         return () => {
-          socket.disconnect();
+
+
+          socket.off('friendsStatus', handleFriendsStatus);
+          socket.off('userStatus', handleUserStatus);
         };
-      }, []);
+      }, [loading]);
+
 
 
       useEffect(()=>{
@@ -55,13 +78,19 @@ const FriendList = ({navigation}) => {
 
   const renderItem = ({ item }) => {
 
+
+
   return <>
     <View style={styles.card}>
       <Image
         source={{ uri: 'https://via.placeholder.com/100' }} // Replace with your logo image URL
         style={styles.logo}
       />
+         <View style={{height:10,width:10,backgroundColor:item?.status=="online"?"green":"red",borderRadius:50,position:"absolute",right:10,top:10}}/>
+
+
       <View style={styles.cardContent}>
+
         <Text style={styles.name}>{item?.name}</Text>
         <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatId:item?.id,userId:userId})}>
           <Text style={styles.chatButtonText}>Chat</Text>

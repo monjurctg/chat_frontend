@@ -23,13 +23,11 @@ const AppNavigator = () => {
       if (!user?.id) return;
       initializeSocket(user.id);
       const handleAppStateChange = (nextAppState) => {
-        console.log({nextAppState})
         if (nextAppState === 'background' || nextAppState === 'inactive') {
           console.log('App moved to background or inactive state');
-          disconnectSocket();
+          // disconnectSocket();
         }
         else if (nextAppState === 'active') {
-          console.log('App moved to foreground');
           initializeSocket(user.id);
         }
       };
