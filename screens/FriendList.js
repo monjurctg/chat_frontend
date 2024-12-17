@@ -19,7 +19,11 @@ const FriendList = ({navigation}) => {
       setLoading(true)
         try {
           const data = await getFriendList();
-        setFriends(data?.friends)
+          if(data?.friends){
+            setFriends(data?.friends)
+
+          }
+
         // console.log({users})
         setLoading(false)
         } catch (error) {
@@ -33,8 +37,8 @@ const FriendList = ({navigation}) => {
 
       useEffect(() => {
 
-        const friendIds = friends.map((friend) => friend.id);
-        socket.emit('getFriendsStatus', friendIds);
+        const friendIds = friends?.map((friend) => friend.id);
+        socket?.emit('getFriendsStatus', friendIds);
 
         // Receive initial friends' statuses from the server
         const handleFriendsStatus = (statuses) => {
@@ -146,7 +150,7 @@ const FriendList = ({navigation}) => {
           numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No suggested friends found.</Text>
+            <Text style={{padding:10}}>No friends found.</Text>
           }
         />
 
