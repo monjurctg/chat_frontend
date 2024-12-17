@@ -11,6 +11,7 @@ const FriendList = ({navigation}) => {
     const [activeTab, setActiveTab] = useState('friendList');
     const [friends,setFriends]=useState([])
     const[loading,setLoading] = useState(false)
+    const[typeId,setTypingId]=useState()
 
     const { user } = useContext(AuthContext)
     let userId = user?.id
@@ -60,6 +61,26 @@ const FriendList = ({navigation}) => {
         };
 
 
+
+            const handleCatchTyping = ({ userId:typingUserId }) => {
+              setTypingId(typingUserId);
+              const name = typingUserId==user?.id? user?.name:chatUser?.name
+              setUsersTyping((prev) => {
+                if (!prev.includes(name)) {
+                  return [...prev, name];
+                }
+                return prev;
+              });
+            }
+
+          const handleCatchStopTyping = ({ userId:typingUserId }) => {
+            setTypingId();
+      }
+        socket.on('typing',handleCatchTyping );
+        socket.on(`stopTyping`,handleCatchStopTyping );
+
+
+
         socket.on('friendsStatus', handleFriendsStatus);
         socket.on('userStatus', handleUserStatus);
 
@@ -69,6 +90,8 @@ const FriendList = ({navigation}) => {
 
           socket.off('friendsStatus', handleFriendsStatus);
           socket.off('userStatus', handleUserStatus);
+          socket.off('typing',handleCatchTyping );
+          socket.off(`stopTyping`,handleCatchStopTyping );
         };
       }, [loading]);
 
@@ -95,7 +118,12 @@ const FriendList = ({navigation}) => {
 
       <View style={styles.cardContent}>
 
-        <Text style={styles.name}>{item?.name}</Text>
+      <View style={{flexDirection:"row",justifyContent:"center",alignItems:"center",marginBottom:7}}>
+      <Text style={styles.name}>{item?.name} </Text>
+        <Text style={{fontSize:12,color:"green"}}>
+        {item?.id==typeId && "Typing..."}
+        </Text>
+      </View>
         <TouchableOpacity style={styles.chatButton} onPress={() => navigation?.navigate("Chat",{chatUser:item})}>
           <Text style={styles.chatButtonText}>Chat</Text>
         </TouchableOpacity>
@@ -219,7 +247,7 @@ const styles = StyleSheet.create({
       name: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        // marginBottom: 10,
       },
       chatButton: {
         backgroundColor: '#4CAF50',

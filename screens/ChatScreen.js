@@ -30,9 +30,9 @@ const ChatScreen = ({ route }) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
 
-    // Handle typing events
+
     socket.on('typing', ({ userId:typingUserId }) => {
-      console.log(`Typing event received for user ${typingUserId}`);
+
       const name = typingUserId==user?.id? user?.name:chatUser?.name
       setUsersTyping((prev) => {
         if (!prev.includes(name)) {
@@ -42,7 +42,6 @@ const ChatScreen = ({ route }) => {
       });
     });
 
-    // Handle stop typing events
     socket.on(`stopTyping`, ({ userId:typingUserId }) => {
       const name = typingUserId==user?.id? user?.name:chatUser?.name
       setUsersTyping((prev) => prev.filter((username) => username !== name));
@@ -83,10 +82,13 @@ const ChatScreen = ({ route }) => {
 
 
 
+
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={messages}
+      showsVerticalScrollIndicator={false}
+        data={[...messages]?.reverse()}
         renderItem={({ item }) => {
 
           return  <View
